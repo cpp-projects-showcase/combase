@@ -1,0 +1,7 @@
+
+That project is part of the showcase platform for C++ projects.
+
+The common base (in short, 'combase') project contains a purely virtual
+C++ class, which serves as a base class for other C++ projects/components.
+
+
