@@ -91,18 +91,6 @@ macro (set_project_options _build_doc _enable_tests)
   option (ENABLE_TEST "Set to OFF to skip build/check unit tests"
 	${_enable_tests})
 
-  # Documentation
-  option (INSTALL_DOC "Set to OFF to skip build/install Documentation" 
-    ${_build_doc})
-
-  # Initialise a few variables
-  set (DOXYGEN_OUTPUT_REL)
-  set (REFMAN_TEX)
-  set (REFMAN_PDF)
-  set (CSS_ALL_TARGETS)
-  set (IMG_ALL_TARGETS)
-  set (MAN_ALL_TARGETS)
-
   # Set the library installation directory (either 32 or 64 bits)
   set (LIBDIR "lib${LIB_SUFFIX}" CACHE PATH
     "Library directory name, either lib or lib64")
@@ -113,13 +101,9 @@ macro (set_project_options _build_doc _enable_tests)
   set (INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
   set (INSTALL_INCLUDE_DIR include CACHE PATH
     "Installation directory for header files")
-  set (INSTALL_DATA_DIR share CACHE PATH
-    "Installation directory for data files")
-  set (INSTALL_SAMPLE_DIR share/${PROJECT_NAME}/samples CACHE PATH
-    "Installation directory for (CSV) sample files")
 
   # Make relative paths absolute (needed later on)
-  foreach (_path_type LIB BIN INCLUDE DATA SAMPLE)
+  foreach (_path_type LIB BIN INCLUDE)
     set (var INSTALL_${_path_type}_DIR)
     if (NOT IS_ABSOLUTE "${${var}}")
       set (${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
@@ -139,30 +123,7 @@ macro (set_project_options _build_doc _enable_tests)
     set (CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
   endif()
 
-  # Define STDAIR_SAMPLE_DIR if the project is STDAIR
-  if ("${PROJECT_NAME}" STREQUAL "stdair")
-    set (STDAIR_SAMPLE_DIR ${INSTALL_SAMPLE_DIR})
-  endif ("${PROJECT_NAME}" STREQUAL "stdair")
-
-  ##
-  # Basic documentation (i.e., AUTHORS, NEWS, README, INSTALL)
-  set (DOC_INSTALL_FILE INSTALL)
-  if (NOT EXISTS ${DOC_INSTALL_FILE})
-    unset (DOC_INSTALL_FILE)
-  endif (NOT EXISTS ${DOC_INSTALL_FILE})
-  set (DOC_NEWS_FILE NEWS)
-  if (NOT EXISTS ${DOC_NEWS_FILE})
-    unset (DOC_NEWS_FILE)
-  endif (NOT EXISTS ${DOC_NEWS_FILE})
-  set (BASICDOC_FILES AUTHORS ${DOC_NEWS_FILE} README ${DOC_INSTALL_FILE})
-  set (BASICDOC_PATH "share/doc/${PACKAGE}-${PACKAGE_VERSION}")
-
 endmacro (set_project_options)
-
-#
-macro (install_basic_documentation)
-  install (FILES ${BASICDOC_FILES} DESTINATION ${BASICDOC_PATH})
-endmacro (install_basic_documentation)
 
 
 #
@@ -190,8 +151,6 @@ macro (store_in_cache)
     "Path to custom CMake Modules" FORCE)
   set (ENABLE_TEST "${ENABLE_TEST}" CACHE BOOL
     "Set to OFF to skip build/check unit tests" FORCE)
-  set (INSTALL_DOC "${INSTALL_DOC}" CACHE BOOL
-    "Set to OFF to skip build/install Documentation" FORCE)
 endmacro (store_in_cache)
 
 
@@ -286,7 +245,7 @@ endmacro (packaging_set_other_options)
 ###################################################################
 # ~~~~~~~~ Wrapper ~~~~~~~~
 macro (get_external_libs)
-  # CMake scripts, to find some dependencies (e.g., Boost, MySQL, SOCI)
+  # CMake scripts, to find some dependencies (e.g., Git, Boost)
   set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/)
 
   #
@@ -306,89 +265,13 @@ macro (get_external_libs)
       get_git (${_arg_version})
     endif (${_arg_lower} STREQUAL "git")
 
-    if (${_arg_lower} STREQUAL "python")
-      get_python (${_arg_version})
-    endif (${_arg_lower} STREQUAL "python")
-
-    if (${_arg_lower} STREQUAL "zeromq")
-      get_zeromq (${_arg_version})
-    endif (${_arg_lower} STREQUAL "zeromq")
-
     if (${_arg_lower} STREQUAL "boost")
       get_boost (${_arg_version})
     endif (${_arg_lower} STREQUAL "boost")
 
-    if (${_arg_lower} STREQUAL "xapian")
-      get_xapian (${_arg_version})
-    endif (${_arg_lower} STREQUAL "xapian")
-
-    if (${_arg_lower} STREQUAL "readline")
-      get_readline (${_arg_version})
-    endif (${_arg_lower} STREQUAL "readline")
-
-    if (${_arg_lower} STREQUAL "mysql")
-      get_mysql (${_arg_version})
-    endif (${_arg_lower} STREQUAL "mysql")
-
-    if (${_arg_lower} STREQUAL "soci")
-      get_soci (${_arg_version})
-    endif (${_arg_lower} STREQUAL "soci")
-
-    if (${_arg_lower} STREQUAL "stdair")
-      get_stdair (${_arg_version})
-    endif (${_arg_lower} STREQUAL "stdair")
-
-    if (${_arg_lower} STREQUAL "sevmgr")
-      get_sevmgr (${_arg_version})
-    endif (${_arg_lower} STREQUAL "sevmgr")
-
-    if (${_arg_lower} STREQUAL "trademgen")
-      get_trademgen (${_arg_version})
-    endif (${_arg_lower} STREQUAL "trademgen")
-
-    if (${_arg_lower} STREQUAL "travelccm")
-      get_travelccm (${_arg_version})
-    endif (${_arg_lower} STREQUAL "travelccm")
-
-    if (${_arg_lower} STREQUAL "airsched")
-      get_airsched (${_arg_version})
-    endif (${_arg_lower} STREQUAL "airsched")
-
-    if (${_arg_lower} STREQUAL "airrac")
-      get_airrac (${_arg_version})
-    endif (${_arg_lower} STREQUAL "airrac")
-
-    if (${_arg_lower} STREQUAL "rmol")
-      get_rmol (${_arg_version})
-    endif (${_arg_lower} STREQUAL "rmol")
-
-    if (${_arg_lower} STREQUAL "airinv")
-      get_airinv (${_arg_version})
-    endif (${_arg_lower} STREQUAL "airinv")
-
-    if (${_arg_lower} STREQUAL "avlcal")
-      get_avlcal (${_arg_version})
-    endif (${_arg_lower} STREQUAL "avlcal")
-
-    if (${_arg_lower} STREQUAL "simfqt")
-      get_simfqt (${_arg_version})
-    endif (${_arg_lower} STREQUAL "simfqt")
-
-    if (${_arg_lower} STREQUAL "simlfs")
-      get_simlfs (${_arg_version})
-    endif (${_arg_lower} STREQUAL "simlfs")
-
-    if (${_arg_lower} STREQUAL "simcrs")
-      get_simcrs (${_arg_version})
-    endif (${_arg_lower} STREQUAL "simcrs")
-
-    if (${_arg_lower} STREQUAL "dsim")
-      get_dsim (${_arg_version})
-    endif (${_arg_lower} STREQUAL "dsim")
-
-    if (${_arg_lower} STREQUAL "doxygen")
-      get_doxygen (${_arg_version})
-    endif (${_arg_lower} STREQUAL "doxygen")
+    if (${_arg_lower} STREQUAL "combase")
+      get_combase (${_arg_version})
+    endif (${_arg_lower} STREQUAL "combase")
 
   endforeach (_arg)
 endmacro (get_external_libs)
@@ -404,66 +287,6 @@ macro (get_git)
     message (STATUS "Current Git revision name: ${PROJ_WC_REVISION_NAME}")
   endif (Git_FOUND)
 endmacro (get_git)
-
-# ~~~~~~~~~~ Python ~~~~~~~~~
-macro (get_python)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires PythonLibs-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires PythonLibs without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  # The first check searches for the libraries and include paths.
-  # However, on some older versions (e.g., on RedHat/CentOS 5.x),
-  # only the static library is searched.
-  find_package (PythonLibs ${_required_version} REQUIRED)
-
-  # The second check is to get the dynamic library for sure.
-  find_package (PythonLibsWrapper ${_required_version} REQUIRED)
-
-  if (PYTHONLIBS_FOUND)
-	# Derive the version of Python (for whatever reason, FindPythonLibs
-	# does not seem to provide that version variable.
-	get_filename_component (PYTHONLIBS_LIB_FILENAME ${PYTHON_LIBRARIES} NAME)
-	string (REGEX REPLACE "^libpython([0-9]+.[0-9]+).*$" "\\1"
-      PYTHONLIBS_VERSION "${PYTHONLIBS_LIB_FILENAME}")
-	message (STATUS "Found PythonLibs ${PYTHONLIBS_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${PYTHON_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    list (APPEND PROJ_DEP_LIBS_FOR_LIB ${PYTHON_LIBRARIES})
-
-  else (PYTHONLIBS_FOUND)
-	message (FATAL_ERROR "Python libraries are missing. Please install them (e.g., 'python-devel' for the Fedora/RedHat package)")
-  endif (PYTHONLIBS_FOUND)
-
-endmacro (get_python)
-
-# ~~~~~~~~~~ ZeroMQ ~~~~~~~~~
-macro (get_zeromq)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires ZeroMQ-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires ZeroMQ without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (ZeroMQ ${_required_version} REQUIRED)
-
-  if (ZEROMQ_FOUND)
-    # Update the list of include directories for the project
-    include_directories (${ZeroMQ_INCLUDE_DIR})
-
-    # Update the list of dependencies for the project
-    list (APPEND PROJ_DEP_LIBS_FOR_LIB ${ZeroMQ_LIBRARIES})
-  endif (ZEROMQ_FOUND)
-
-endmacro (get_zeromq)
 
 # ~~~~~~~~~~ BOOST ~~~~~~~~~~
 macro (get_boost)
@@ -517,544 +340,36 @@ macro (get_boost)
 
 endmacro (get_boost)
 
-# ~~~~~~~~~~ Xapian ~~~~~~~~~
-macro (get_xapian)
+# ~~~~~~~~~~ ComBase ~~~~~~~~~
+macro (get_combase)
   unset (_required_version)
   if (${ARGC} GREATER 0)
     set (_required_version ${ARGV0})
-    message (STATUS "Requires Xapian-${_required_version}")
+    message (STATUS "Requires ComBase-${_required_version}")
   else (${ARGC} GREATER 0)
-    message (STATUS "Requires Xapian without specifying any version")
+    message (STATUS "Requires ComBase without specifying any version")
   endif (${ARGC} GREATER 0)
 
-  # The first check is to get Xapian installation details
-  find_package (Xapian)
-
-  # The second check is for the required version (FindXapianWrapper.cmake is
-  # provided by us). Indeed, the Fedora/RedHat xapian-config.cmake does not seem
-  # to provide version enforcement.
-  find_package (XapianWrapper ${_required_version} REQUIRED)
-
-  if (XAPIAN_FOUND)
-    # Update the list of include directories for the project
-    include_directories (${XAPIAN_INCLUDE_DIR})
-
-    # Update the list of dependencies for the project
-    list (APPEND PROJ_DEP_LIBS_FOR_LIB ${XAPIAN_LIBRARIES})
-  endif (XAPIAN_FOUND)
-
-endmacro (get_xapian)
-
-# ~~~~~~~~~~ Readline ~~~~~~~~~
-macro (get_readline)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires Readline-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires Readline without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  set (READLINE_FOUND False)
-
-  find_package (Readline ${_required_version} REQUIRED)
-  if (READLINE_LIBRARY)
-    set (READLINE_FOUND True)
-  endif (READLINE_LIBRARY)
-
-  if (READLINE_FOUND)
-    # Update the list of include directories for the project
-    include_directories (${READLINE_INCLUDE_DIR})
-
-    # Update the list of dependencies for the project
-    list (APPEND PROJ_DEP_LIBS_FOR_LIB ${READLINE_LIBRARY})
-  endif (READLINE_FOUND)
-
-endmacro (get_readline)
-
-# ~~~~~~~~~~ MySQL ~~~~~~~~~
-macro (get_mysql)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires MySQL-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires MySQL without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (MySQL ${_required_version} REQUIRED)
-  if (MYSQL_FOUND)
-
-    # Update the list of include directories for the project
-    include_directories (${MYSQL_INCLUDE_DIR})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${MYSQL_LIBRARIES})
-  endif (MYSQL_FOUND)
-
-endmacro (get_mysql)
-
-# ~~~~~~~~~~ SOCI ~~~~~~~~~~
-macro (get_soci)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires SOCI-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires SOCI without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (SOCIMySQL ${_required_version} REQUIRED)
-  if (SOCIMYSQL_FOUND)
+  find_package (ComBase ${_required_version} REQUIRED
+	HINTS ${WITH_COMBASE_PREFIX})
+  if (Combase_FOUND)
     #
-    message (STATUS "Found SOCI with MySQL back-end support version:"
-	  " ${SOCI_HUMAN_VERSION}")
+    message (STATUS "Found ComBase version: ${COMBASE_VERSION}")
 
     # Update the list of include directories for the project
-    include_directories (${SOCI_INCLUDE_DIR})
-    include_directories (${SOCIMYSQL_INCLUDE_DIR})
+    include_directories (${COMBASE_INCLUDE_DIRS})
 
     # Update the list of dependencies for the project
-    list (APPEND PROJ_DEP_LIBS_FOR_LIB ${SOCI_LIBRARIES} ${SOCIMYSQL_LIBRARIES})
-  endif (SOCIMYSQL_FOUND)
+    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${COMBASE_LIBRARIES})
 
-endmacro (get_soci)
-
-# ~~~~~~~~~~ Doxygen ~~~~~~~~~
-macro (get_doxygen)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires Doxygen-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires Doxygen without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  # The first check is to get Doxygen installation details
-  find_package (Doxygen)
-
-  # The second check is for the required version (FindDoxygenWrapper.cmake is
-  # provided by us). Indeed, the Fedora/RedHat FindDoxygen.cmake does not seem
-  # to provide version enforcement.
-  find_package (DoxygenWrapper ${_required_version} REQUIRED)
-
-endmacro (get_doxygen)
-
-# ~~~~~~~~~~ StdAir ~~~~~~~~~
-macro (get_stdair)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires StdAir-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires StdAir without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (StdAir ${_required_version} REQUIRED
-	HINTS ${WITH_STDAIR_PREFIX})
-  if (StdAir_FOUND)
-    #
-    message (STATUS "Found StdAir version: ${STDAIR_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${STDAIR_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${STDAIR_LIBRARIES})
-
-  else (StdAir_FOUND)
-    set (ERROR_MSG "The StdAir library cannot be found. If it is installed in")
+  else (Combase_FOUND)
+    set (ERROR_MSG "The ComBase library cannot be found. If it is installed in")
     set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_STDAIR_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<StdAir install path> variable.")
+    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_COMBASE_PREFIX=")
+    set (ERROR_MSG "${ERROR_MSG}<ComBase install path> variable.")
     message (FATAL_ERROR "${ERROR_MSG}")
-  endif (StdAir_FOUND)
-
-endmacro (get_stdair)
-
-# ~~~~~~~~~~ SEvMgr ~~~~~~~~~
-macro (get_sevmgr)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires SEvMgr-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires SEvMgr without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (SEvMgr ${_required_version} REQUIRED
-	HINTS ${WITH_SEVMGR_PREFIX})
-  if (SEvMgr_FOUND)
-    #
-    message (STATUS "Found SEvMgr version: ${SEVMGR_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${SEVMGR_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${SEVMGR_LIBRARIES})
-
-  else (SEvMgr_FOUND)
-    set (ERROR_MSG "The SEvMgr library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_SEVMGR_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<SEvMgr install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (SEvMgr_FOUND)
-
-endmacro (get_sevmgr)
-
-# ~~~~~~~~~~ TraDemGen ~~~~~~~~~
-macro (get_trademgen)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires TraDemGen-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires TraDemGen without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (TraDemGen ${_required_version} REQUIRED
-	HINTS ${WITH_TRADEMGEN_PREFIX})
-  if (TraDemGen_FOUND)
-    #
-    message (STATUS "Found TraDemGen version: ${TRADEMGEN_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${TRADEMGEN_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${TRADEMGEN_LIBRARIES})
-
-  else (TraDemGen_FOUND)
-    set (ERROR_MSG "The TraDemGen library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_TRADEMGEN_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<TraDemGen install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (TraDemGen_FOUND)
-
-endmacro (get_trademgen)
-
-# ~~~~~~~~~~ TravelCCM ~~~~~~~~~
-macro (get_travelccm)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires TravelCCM-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires TravelCCM without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (TravelCCM ${_required_version} REQUIRED
-	HINTS ${WITH_TRAVELCCM_PREFIX})
-  if (TravelCCM_FOUND)
-    #
-    message (STATUS "Found TravelCCM version: ${TRAVELCCM_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${TRAVELCCM_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${TRAVELCCM_LIBRARIES})
-
-  else (TravelCCM_FOUND)
-    set (ERROR_MSG "The TravelCCM library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_TRAVELCCM_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<TravelCCM install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (TravelCCM_FOUND)
-
-endmacro (get_travelccm)
-
-# ~~~~~~~~~~ AirSched ~~~~~~~~~
-macro (get_airsched)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires AirSched-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires AirSched without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (AirSched ${_required_version} REQUIRED
-	HINTS ${WITH_AIRSCHED_PREFIX})
-  if (AirSched_FOUND)
-    #
-    message (STATUS "Found AirSched version: ${AIRSCHED_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${AIRSCHED_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${AIRSCHED_LIBRARIES})
-
-  else (AirSched_FOUND)
-    set (ERROR_MSG "The AirSched library cannot be found. If it is installed")
-    set (ERROR_MSG "${ERROR_MSG} in a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_AIRSCHED_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<AirSched install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (AirSched_FOUND)
-
-endmacro (get_airsched)
-
-# ~~~~~~~~~~ AirRAC ~~~~~~~~~
-macro (get_airrac)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires AirRAC-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires AirRAC without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (AirRAC ${_required_version} REQUIRED
-	HINTS ${WITH_AIRRAC_PREFIX})
-  if (AirRAC_FOUND)
-    #
-    message (STATUS "Found AirRAC version: ${AIRRAC_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${AIRRAC_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${AIRRAC_LIBRARIES})
-
-  else (AirRAC_FOUND)
-    set (ERROR_MSG "The AirRAC library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_AIRRAC_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<AirRAC install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (AirRAC_FOUND)
-
-endmacro (get_airrac)
-
-# ~~~~~~~~~~ RMOL ~~~~~~~~~
-macro (get_rmol)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires RMOL-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires RMOL without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (RMOL ${_required_version} REQUIRED
-	HINTS ${WITH_RMOL_PREFIX})
-  if (RMOL_FOUND)
-    #
-    message (STATUS "Found RMOL version: ${RMOL_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${RMOL_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${RMOL_LIBRARIES})
-
-  else (RMOL_FOUND)
-    set (ERROR_MSG "The RMOL library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_RMOL_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<RMOL install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (RMOL_FOUND)
-
-endmacro (get_rmol)
-
-# ~~~~~~~~~~ AirInv ~~~~~~~~~
-macro (get_airinv)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires AirInv-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires AirInv without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (AirInv ${_required_version} REQUIRED
-	HINTS ${WITH_AIRINV_PREFIX})
-  if (AirInv_FOUND)
-    #
-    message (STATUS "Found AirInv version: ${AIRINV_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${AIRINV_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${AIRINV_LIBRARIES})
-
-  else (AirInv_FOUND)
-    set (ERROR_MSG "The AirInv library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_AIRINV_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<AirInv install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (AirInv_FOUND)
-
-endmacro (get_airinv)
-
-# ~~~~~~~~~~ AvlCal ~~~~~~~~~
-macro (get_avlcal)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires AvlCal-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires AvlCal without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (AvlCal ${_required_version} REQUIRED
-	HINTS ${WITH_AVLCAL_PREFIX})
-  if (AvlCal_FOUND)
-    #
-    message (STATUS "Found AvlCal version: ${AVLCAL_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${AVLCAL_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${AVLCAL_LIBRARIES})
-
-  else (AvlCal_FOUND)
-    set (ERROR_MSG "The AvlCal library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_AVLCAL_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<AvlCal install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (AvlCal_FOUND)
-
-endmacro (get_avlcal)
-
-# ~~~~~~~~~~ SimFQT ~~~~~~~~~
-macro (get_simfqt)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires SimFQT-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires SimFQT without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (SimFQT ${_required_version} REQUIRED
-	HINTS ${WITH_SIMFQT_PREFIX})
-  if (SimFQT_FOUND)
-    #
-    message (STATUS "Found SimFQT version: ${SIMFQT_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${SIMFQT_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${SIMFQT_LIBRARIES})
-
-  else (SimFQT_FOUND)
-    set (ERROR_MSG "The SimFQT library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_SIMFQT_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<SimFQT install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (SimFQT_FOUND)
-
-endmacro (get_simfqt)
-
-# ~~~~~~~~~~ SimLFS ~~~~~~~~~
-macro (get_simlfs)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires SimLFS-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires SimLFS without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (SimLFS ${_required_version} REQUIRED
-	HINTS ${WITH_SIMLFS_PREFIX})
-  if (SimLFS_FOUND)
-    #
-    message (STATUS "Found SimLFS version: ${SIMLFS_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${SIMLFS_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${SIMLFS_LIBRARIES})
-
-  else (SimLFS_FOUND)
-    set (ERROR_MSG "The SimLFS library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_SIMLFS_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<SimLFS install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (SimLFS_FOUND)
-
-endmacro (get_simlfs)
-
-# ~~~~~~~~~~ SimCRS ~~~~~~~~~
-macro (get_simcrs)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires SimCRS-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires SimCRS without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (SimCRS ${_required_version} REQUIRED
-	HINTS ${WITH_SIMCRS_PREFIX})
-  if (SimCRS_FOUND)
-    #
-    message (STATUS "Found SimCRS version: ${SIMCRS_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${SIMCRS_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${SIMCRS_LIBRARIES})
-
-  else (SimCRS_FOUND)
-    set (ERROR_MSG "The SimCRS library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_SIMCRS_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<SimCRS install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (SimCRS_FOUND)
-
-endmacro (get_simcrs)
-
-# ~~~~~~~~~~ DSim ~~~~~~~~~
-macro (get_dsim)
-  unset (_required_version)
-  if (${ARGC} GREATER 0)
-    set (_required_version ${ARGV0})
-    message (STATUS "Requires DSim-${_required_version}")
-  else (${ARGC} GREATER 0)
-    message (STATUS "Requires DSim without specifying any version")
-  endif (${ARGC} GREATER 0)
-
-  find_package (DSim ${_required_version} REQUIRED
-	HINTS ${WITH_DSIM_PREFIX})
-  if (DSim_FOUND)
-    #
-    message (STATUS "Found DSim version: ${DSIM_VERSION}")
-
-    # Update the list of include directories for the project
-    include_directories (${DSIM_INCLUDE_DIRS})
-
-    # Update the list of dependencies for the project
-    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${DSIM_LIBRARIES})
-
-  else (DSim_FOUND)
-    set (ERROR_MSG "The DSim library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
-    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_DSIM_PREFIX=")
-    set (ERROR_MSG "${ERROR_MSG}<DSim install path> variable.")
-    message (FATAL_ERROR "${ERROR_MSG}")
-  endif (DSim_FOUND)
-
-endmacro (get_dsim)
+  endif (Combase_FOUND)
+endmacro (get_combase)
 
 
 ##############################################
@@ -1106,9 +421,6 @@ endmacro (init_build)
 
 # Define the substitutes for the variables present in the development
 # support files.
-# Note that STDAIR_SAMPLE_DIR is either defined because the current project
-# is StdAir, or because the current project has a dependency on StdAir, 
-# in which case STDAIR_SAMPLE_DIR is an imported variable.
 macro (set_install_directories)
   set (prefix        ${CMAKE_INSTALL_PREFIX})
   set (exec_prefix   ${prefix})
@@ -1121,15 +433,14 @@ macro (set_install_directories)
   set (datarootdir   ${prefix}/share)
   set (datadir       ${datarootdir})
   set (pkgdatadir    ${datarootdir}/${PACKAGE})
-  set (sampledir     ${STDAIR_SAMPLE_DIR})
   set (docdir        ${datarootdir}/doc/${PACKAGE}-${PACKAGE_VERSION})
   set (htmldir       ${docdir}/html)
   set (pdfdir        ${htmldir})
   set (mandir        ${datarootdir}/man)
   set (infodir       ${datarootdir}/info)
-  set (pkgincludedir ${includedir}/stdair)
-  set (pkglibdir     ${libdir}/stdair)
-  set (pkglibexecdir ${libexecdir}/stdair)
+  set (pkgincludedir ${includedir}/combase)
+  set (pkglibdir     ${libdir}/combase)
+  set (pkglibexecdir ${libexecdir}/combase)
 endmacro (set_install_directories)
 
 
@@ -1172,33 +483,6 @@ macro (add_modules)
 endmacro (add_modules)
 
 ##
-# Convert the configuration headers (basically, just replace the @<variable>@
-# variables).
-macro (module_generate_config_helpers)
-
-  # Generic module configuration header
-  if (EXISTS config.h.in)
-    configure_file (config.h.in config.h @ONLY)
-  endif (EXISTS config.h.in)
-
-  # Specific module configuration header
-  set (PROJ_PATH_CFG_SRC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/config/${MODULE_NAME}-paths.hpp.in)
-  set (PROJ_PATH_CFG_DIR ${CMAKE_CURRENT_BINARY_DIR}/config)
-  if (EXISTS ${PROJ_PATH_CFG_SRC})
-    set (PROJ_PATH_CFG ${PROJ_PATH_CFG_DIR}/${MODULE_NAME}-paths.hpp)
-    configure_file (${PROJ_PATH_CFG_SRC} ${PROJ_PATH_CFG} @ONLY)
-  
-    # Add the 'hdr_cfg_${MODULE_NAME}' target, depending on the converted header
-    add_custom_target (hdr_cfg_${MODULE_NAME} ALL DEPENDS ${PROJ_PATH_CFG})
-
-  else (EXISTS ${PROJ_PATH_CFG_SRC})
-    message (FATAL_ERROR "The ${PROJ_PATH_CFG_SRC} file is missing.")
-  endif (EXISTS ${PROJ_PATH_CFG_SRC})
-
-endmacro (module_generate_config_helpers)
-
-##
 # Building and installation of the "standard library".
 # All the sources within each of the layers/sub-directories are used and
 # assembled, in order to form a single library, named here the
@@ -1210,9 +494,6 @@ endmacro (module_generate_config_helpers)
 #    the header files of the root directory are to be published.
 #  * A list of additional dependency on inter-module library targets.
 macro (module_library_add_standard _layer_list)
-  # First, generate the configuration helper header files
-  module_generate_config_helpers ()
-
   # ${ARGV} contains a single semi-colon (';') separated list, which
   # is the aggregation of all the elements of all the list parameters.
   # The list of intermodule dependencies must therefore be calculated.
@@ -1319,7 +600,7 @@ endmacro (module_library_add_standard)
 #
 # The additional parameters, if given, correspond to the names of the
 # modules this current module depends upon. Dependencies on the
-# external libraries (e.g., Boost, SOCI, StdAir) are automatically
+# external libraries (e.g., Boost, ComBase) are automatically
 # appended, thanks to the get_external_libs() macro.
 macro (module_library_add_specific
     _lib_short_name _lib_dir _lib_headers _lib_sources)
@@ -1341,7 +622,7 @@ macro (module_library_add_specific
   endforeach (_arg_module)
 
   # Add the dependencies:
-  #  * on external libraries (Boost, MySQL, SOCI, StdAir), as calculated by 
+  #  * on external libraries (Boost, ComBase), as calculated by 
   #    the get_external_libs() macro above;
   #  * on the other module libraries, as provided as paramaters to this macro
   #  * on the main/standard library of the module (when, of course, the
@@ -1364,15 +645,6 @@ macro (module_library_add_specific
   # reporting purpose).
   set (${MODULE_NAME}_INTER_TARGETS ${_intermodule_dependencies})
   set (${MODULE_NAME}_INTER_TARGETS ${_intermodule_dependencies} PARENT_SCOPE)
-
-  # For the "standard library", an extra dependency must be added:
-  #  * generated configuration header
-  if (${_lib_short_name} STREQUAL ${MODULE_NAME})
-    ##
-    # Add the dependency on the generated configuration headers, 
-    # as generated by the module_generate_config_helpers() macro
-    add_dependencies (${_lib_target} hdr_cfg_${MODULE_NAME})
-  endif (${_lib_short_name} STREQUAL ${MODULE_NAME})
 
   ##
   # Library name (and soname)
@@ -1496,49 +768,6 @@ macro (module_binary_add _exec_source_dir)
   set (${MODULE_NAME}_ALL_EXECS ${${MODULE_NAME}_ALL_EXECS} PARENT_SCOPE)
 
 endmacro (module_binary_add)
-
-##
-# Add a (Shell, Python, Perl, Ruby, etc) script to be installed.
-#
-# The parameter is the relative file path of the (template) script to
-# be installed. That template file must end with the '.in' suffix.
-# Indeed, the project variables (wrapped by @@ signs) of the template file
-# are evaluated and expanded thanks to the configure command.
-# The '.in' extension of the script is dropped once installed.
-#
-macro (module_script_add _script_file)
-  #
-  set (_full_script_src_path ${CMAKE_CURRENT_SOURCE_DIR}/${_script_file}.in)
-  set (_full_script_path ${CMAKE_CURRENT_BINARY_DIR}/${_script_file})
-  if (EXISTS ${_full_script_src_path})
-	#
-    configure_file (${_full_script_src_path} ${_full_script_path} @ONLY)
-
-	# Extract the file name (only) from the full file path
-	get_filename_component (_script_alone ${_script_file} NAME)
-    
-	# Add the 'scripts_${MODULE_NAME}' target, depending on the
-    # converted (Shell, Python, Perl, Ruby, etc) scripts
-    add_custom_target (${_script_alone}_script ALL DEPENDS ${_full_script_path})
-
-    # Install the (Shell, Python, Perl, Ruby, etc) script file
-    install (PROGRAMS ${_full_script_path} DESTINATION bin COMPONENT devel)
-
-  else (EXISTS ${_full_script_src_path})
-    message (FATAL_ERROR
-      "The Python template script, '${_script_file}.in', does not exist")
-  endif (EXISTS ${_full_script_src_path})
-
-  # Register the binary target in the project (for reporting purpose)
-  list (APPEND PROJ_ALL_BIN_TARGETS ${_script_alone})
-  set (PROJ_ALL_BIN_TARGETS ${PROJ_ALL_BIN_TARGETS} PARENT_SCOPE)
-
-  # Register, for reporting purpose, the list of executables to be built
-  # and installed for that module
-  list (APPEND ${MODULE_NAME}_ALL_EXECS ${_script_alone})
-  set (${MODULE_NAME}_ALL_EXECS ${${MODULE_NAME}_ALL_EXECS} PARENT_SCOPE)
-
-endmacro (module_script_add)
 
 ##
 # Installation of the CMake import helper, so that third party projects
@@ -1678,271 +907,6 @@ endmacro (module_test_build_all)
 
 
 ###################################################################
-##                         Documentation                         ##
-###################################################################
-##
-# HTML pages and PDF reference manual
-##
-#
-macro (handle_html_doc)
-  if (${INSTALL_DOC} STREQUAL "ON")
-	add_subdirectory (doc)
-  endif (${INSTALL_DOC} STREQUAL "ON")
-endmacro (handle_html_doc)
-
-# Define the substitutes for the variables present in the Doxygen
-# configuration files. Note that PACKAGE, PACKAGE_NAME and PACKAGE_VERSION
-# are defined in the main CMakeLists.txt (of the top root directory).
-macro (doc_set_directories)
-  set (OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-  set (top_srcdir ${CMAKE_SOURCE_DIR})
-  set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
-endmacro (doc_set_directories)
-
-#
-macro (doc_add_web_pages)
-  # Set the documentation directories for the Doxygen configuration file
-  doc_set_directories()
-
-  # Convert the Doxygen configuration files (basically, just replace
-  # the @<variable>@ variables).
-  set (DOXYGEN_CFG_SRC doxygen_html.cfg.in)
-  set (DOXYGEN_CFG ${CMAKE_CURRENT_BINARY_DIR}/doxygen_html.cfg)
-  configure_file (${DOXYGEN_CFG_SRC} ${DOXYGEN_CFG} @ONLY)
-
-  ## Documentation sources
-  # (CSS) Style sheets
-  set (docstyles_DIR ${CMAKE_CURRENT_SOURCE_DIR}/styles)
-  set (style_SOURCES ${CPACK_PACKAGE_NAME}.css)
-  set (docstyles_SOURCES ${docstyles_DIR}/${style_SOURCES})
-  # Images
-  set (docimages_DIR ${CMAKE_CURRENT_SOURCE_DIR}/images)
-  set (image_SOURCES ${CPACK_PACKAGE_NAME}_logo.png sfx_logo.png favicon.ico)
-  set (docimages_SOURCES "")
-  foreach (_doc_img_src ${image_SOURCES})
-	list (APPEND docimages_SOURCES ${docimages_DIR}/${_doc_img_src})
-  endforeach (_doc_img_src ${image_SOURCES})
-  # Tutorial
-  FILE (GLOB doctutorial_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tutorial/*.doc)
-  # Local
-  FILE (GLOB doclocaldoc_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/local/*.doc)
-  FILE (GLOB doclocalhtml_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/local/*.html)
-  set (doclocal_SOURCES ${doclocaldoc_SOURCES} ${doclocalhtml_SOURCES})
-  # Aggregating all the documentation sources
-  set (doc_SOURCES ${doctutorial_SOURCES} ${doclocal_SOURCES}
-	${docstyles_SOURCES} ${docimages_SOURCES})
-
-  # Latex reference manual source (.tex file), generated by Doxygen
-  set (REFMAN refman)
-  set (TEX_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/latex)
-  set (REFMAN_TEX ${REFMAN}.tex)
-  set (REFMAN_TEX ${REFMAN_TEX} PARENT_SCOPE)
-  set (REFMAN_TEX_FULL ${TEX_GEN_DIR}/${REFMAN_TEX})
-
-  # Add the build rule for Doxygen
-  set (DOXYGEN_OUTPUT_REL html/index.html)
-  set (DOXYGEN_OUTPUT_REL ${DOXYGEN_OUTPUT_REL} PARENT_SCOPE)
-  set (DOXYGEN_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${DOXYGEN_OUTPUT_REL})
-  set (DOXYGEN_OUTPUT ${DOXYGEN_OUTPUT} PARENT_SCOPE)
-  add_custom_command (OUTPUT ${DOXYGEN_OUTPUT} ${REFMAN_TEX_FULL}
-	COMMAND ${DOXYGEN_EXECUTABLE} ARGS ${DOXYGEN_CFG}
-	DEPENDS ${DOXYGEN_CFG} ${doc_SOURCES}
-	COMMENT "Generating documentation with Doxygen, from '${DOXYGEN_CFG}'...")
-  # Add the 'doc' target, depending on the generated HTML documentation
-  add_custom_target (doc ALL DEPENDS ${DOXYGEN_OUTPUT} ${REFMAN_TEX_FULL})
-
-  ##
-  # Copy the needed files into the generated HTML directory
-  set (htmldoc_DIR ${CMAKE_CURRENT_BINARY_DIR}/html)
-  set (pdfdoc_DIR ${CMAKE_CURRENT_BINARY_DIR}/latex)
-
-  # (CSS) Style sheets
-  foreach (style_SRC ${style_SOURCES})
-	set (CSS_SRC_FULL_DIR ${docstyles_DIR}/${style_SRC})
-	set (CSS_GEN_FULL_DIR ${htmldoc_DIR}/${style_SRC})
-	add_custom_command (OUTPUT ${CSS_GEN_FULL_DIR}
-	  COMMAND ${CMAKE_COMMAND}
-	  ARGS -E copy ${CSS_SRC_FULL_DIR} ${CSS_GEN_FULL_DIR}
-	  DEPENDS doc ${CSS_SRC_FULL_DIR}
-	  COMMENT "Copying style '${CSS_SRC_FULL_DIR}' into '${htmldoc_DIR}'...")
-
-	# Transpose the CSS-related operation into a target, so that CMake
-	# can handle it properly
-	add_custom_target (css_${style_SRC} ALL DEPENDS ${CSS_GEN_FULL_DIR})
-	list (APPEND CSS_ALL_TARGETS css_${style_SRC})
-  endforeach (style_SRC)
-  set (CSS_ALL_TARGETS ${CSS_ALL_TARGETS} PARENT_SCOPE)
-  add_custom_target (css_style ALL DEPENDS ${CSS_ALL_TARGETS})
-
-  # Images
-  foreach (image_SRC ${image_SOURCES})
-	set (IMG_SRC_FULL_DIR ${docimages_DIR}/${image_SRC})
-	set (IMG_GEN_FULL_DIR ${htmldoc_DIR}/${image_SRC})
-	add_custom_command (OUTPUT ${IMG_GEN_FULL_DIR}
-	  COMMAND ${CMAKE_COMMAND} 
-	  ARGS -E copy ${IMG_SRC_FULL_DIR} ${IMG_GEN_FULL_DIR}
-	  DEPENDS doc ${IMG_SRC_FULL_DIR}
-	  COMMENT "Copying image '${IMG_SRC_FULL_DIR}' into '${htmldoc_DIR}'...")
-
-	# Transpose the image-related operation into a target, so that CMake
-	# can handle it properly
-	add_custom_target (img_${image_SRC} ALL DEPENDS ${IMG_GEN_FULL_DIR})
-	list (APPEND IMG_ALL_TARGETS img_${image_SRC})
-  endforeach (image_SRC)
-  set (IMG_ALL_TARGETS ${IMG_ALL_TARGETS} PARENT_SCOPE)
-  add_custom_target (img_style ALL DEPENDS ${IMG_ALL_TARGETS})
-
-  ##
-  # PDF, generated by (Pdf)Latex from the Latex source file, itself generated
-  # by Doxygen (see above)
-  set (REFMAN_IDX ${REFMAN}.idx)
-  set (REFMAN_IDX_FULL ${TEX_GEN_DIR}/${REFMAN_IDX})
-  set (REFMAN_PDF ${REFMAN}.pdf)
-  set (REFMAN_PDF ${REFMAN_PDF} PARENT_SCOPE)
-  set (REFMAN_PDF_FULL ${TEX_GEN_DIR}/${REFMAN_PDF})
-  # Note the "|| echo" addition to the pdflatex command, as that latter returns
-  # as if there were an error.
-  add_custom_command (OUTPUT ${REFMAN_IDX_FULL} ${REFMAN_PDF_FULL}
-	DEPENDS doc css_style img_style
-	COMMAND ${CMAKE_COMMAND}
-	ARGS -E chdir ${TEX_GEN_DIR} pdflatex -interaction batchmode ${REFMAN_TEX} || echo 'First PDF generation done.'
-	COMMAND ${CMAKE_COMMAND}
-	ARGS -E chdir ${TEX_GEN_DIR} egrep -s 'Rerun to get cross-references right' refman.log && (cd ${TEX_GEN_DIR} && pdflatex -interaction batchmode ${REFMAN_TEX} || echo 'Second PDF generation done.') || echo 'Second PDF generation was not necessary'
-	COMMAND ${CMAKE_COMMAND}
-	ARGS -E chdir ${TEX_GEN_DIR} egrep -s 'Rerun to get cross-references right' refman.log && (cd ${TEX_GEN_DIR} && pdflatex -interaction batchmode ${REFMAN_TEX} || echo 'Third PDF generation done.') || echo 'Third PDF generation was not necessary'
-	COMMAND ${CMAKE_COMMAND}
-	ARGS -E chdir ${TEX_GEN_DIR} test -f ${REFMAN_PDF} || (cd ${TEX_GEN_DIR} && touch ${REFMAN_PDF} && echo 'Warning: the PDF reference manual ('${REFMAN_PDF_FULL}') has failed to build. You can perform a simple re-build ('make' in the 'doc/latex' sub-directory).')
-	COMMENT "Generating PDF Reference Manual ('${REFMAN_TEX}' => '${REFMAN_PDF}')...")
-  # Add the 'pdf' target, depending on the generated PDF manual
-  add_custom_target (pdf ALL DEPENDS ${REFMAN_PDF_FULL})
-
-  # Clean-up $build/html and $build/latex on 'make clean'
-  set_property (DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES 
-	${htmldoc_DIR} ${pdfdoc_DIR})
-
-  ##
-  # Installation of the HTML documentation
-  set (DOC_PATH share/doc/${PROJECT_NAME}-${CPACK_PACKAGE_VERSION})
-  # HTML pages
-  install (DIRECTORY ${htmldoc_DIR} DESTINATION ${DOC_PATH})
-  # PDF reference manual
-  # Note: the 'OPTIONAL' ensures that even when the PDF file fails to be
-  # generated, the install process does not complain. If the PDF build fails,
-  # a simple re-build ('make' in the 'doc/latex' sub-directory) is usually 
-  # enough.
-  install (FILES ${REFMAN_PDF_FULL} DESTINATION ${DOC_PATH}/html OPTIONAL)
-endmacro (doc_add_web_pages)
-
-##
-# Manual pages
-##
-macro (doc_add_man_pages)
-  # Specify the relative path where the manual pages are to be installed.
-  # That path is relative to the installation prefix. By default, the prefix
-  # is '/usr', and the manual page installation directory is therefore
-  # /usr/share/man
-  set (MAN_PATH "share/man")
-
-  # Specify the list of manual sections, e.g.:
-  #  * Section 1 (general commands)
-  #  * Section 3 (development)
-  set (man_section_list "")
-  foreach (_idx RANGE 1 9)
-    list (APPEND man_section_list ${_idx})
-  endforeach (_idx RANGE 1 9)
-
-  # Initialise the lists gathering information for each valid manual section
-  set (man_dir_list)
-
-  # Parse the arguments
-  set (options)
-  set (oneValueArgs)
-
-  # Added one argument option for every manual section
-  foreach (man_sect ${man_section_list})
-    list (APPEND multiValueArgs MAN${man_sect})
-  endforeach (man_sect ${man_section_list})
-
-  # When available, use the convenient dedicated CMake function to parse
-  # the options. When not, the options must be parsed manually.
-  if (${CMAKE_VERSION} VERSION_GREATER 2.8.1)
-    cmake_parse_arguments (_man_arg "${options}" "${oneValueArgs}"
-      "${multiValueArgs}" ${ARGN})
-
-  else (${CMAKE_VERSION} VERSION_GREATER 2.8.1)
-    set (_current_section "")
-    set (_man_arg_MAN1 "")
-    set (_man_arg_MAN3 "")
-
-    foreach (_option_item ${ARGN})
-      string (REGEX MATCH "MAN([1-9])" _current_section_tmp "${_option_item}")
-      if ("${CMAKE_MATCH_1}" STREQUAL "")
-	list (APPEND _man_arg_MAN${_current_section} ${_option_item})
-      else ("${CMAKE_MATCH_1}" STREQUAL "")
-	set (_current_section "${CMAKE_MATCH_1}")
-      endif ("${CMAKE_MATCH_1}" STREQUAL "")
-    endforeach (_option_item ${ARGN})
-  endif (${CMAKE_VERSION} VERSION_GREATER 2.8.1)
-
-  # Set the documentation directories for the Doxygen configuration file
-  doc_set_directories()
-
-  # Browse all the manual sections
-  foreach (man_sect ${man_section_list})
-	# If the (current) macro was passed arguments for the current manual 
-	# section, process the generation of manual pages (with Doxygen).
-	if (NOT "${_man_arg_MAN${man_sect}}" STREQUAL "")
-
-	  # Specify in which sub-directory the manual pages are to be found
-	  set (man${man_sect}_DIR ${CMAKE_CURRENT_BINARY_DIR}/man${man_sect})
-	  # Add that sub-directory to the dedicated list
-	  list (APPEND man_dir_list ${man${man_sect}_DIR})
-
-	  # Convert the Doxygen configuration files (basically, just replace
-	  # the @<variable>@ variables).
-	  set (man_doxy_cfg doxygen_man${man_sect}.cfg)
-	  set (DOXYGEN_CFG${man_sect}_SRC ${man_doxy_cfg}.in)
-	  set (DOXYGEN_CFG${man_sect} ${CMAKE_CURRENT_BINARY_DIR}/${man_doxy_cfg})
-	  configure_file (${DOXYGEN_CFG${man_sect}_SRC}
-		${DOXYGEN_CFG${man_sect}} @ONLY)
-
-	  # Manual page sources for the current manual section
-	  foreach (_doc_src ${_man_arg_MAN${man_sect}})
-		list (APPEND man${man_sect}_SOURCES ${_doc_src}.doc)
-	  endforeach (_doc_src ${_man_arg_MAN${man_sect}})
-
-	  # Add the build rule for Doxygen for section 1 manual pages
-	  set (DOXYGEN_OUTPUT${man_sect}
-		${man${man_sect}_DIR}/stdair-config.${man_sect})
-	  add_custom_command (OUTPUT ${DOXYGEN_OUTPUT${man_sect}}
-		COMMAND ${DOXYGEN_EXECUTABLE} ARGS ${DOXYGEN_CFG${man_sect}}
-		DEPENDS ${DOXYGEN_CFG${man_sect}} ${man${man_sect}_SOURCES}
-		COMMENT "Generating section ${man_sect} manual pages with Doxygen, from '${DOXYGEN_CFG${man_sect}}'...")
-
-	  # Transpose the man-page-related operation into a target, so that CMake
-	  # can handle it properly
-	  add_custom_target (man_${man_sect} 
-		ALL DEPENDS ${DOXYGEN_OUTPUT${man_sect}})
-	  list (APPEND MAN_ALL_TARGETS man_${man_sect})
-
-	  # Specifiy what to do for the installation of the manual pages
-	  install (DIRECTORY "${man${man_sect}_DIR}" DESTINATION ${MAN_PATH})
-
-	endif (NOT "${_man_arg_MAN${man_sect}}" STREQUAL "")
-  endforeach (man_sect ${man_section_list})
-
-  # Add the 'man' target, depending on the generated manual page documentation
-  set (MAN_ALL_TARGETS ${MAN_ALL_TARGETS} PARENT_SCOPE)
-  add_custom_target (man ALL DEPENDS ${MAN_ALL_TARGETS})
-
-  # Clean-up $build/man1 and $build/man3 on 'make clean'
-  set_property (DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES 
-	${man_dir_list})
-
-endmacro (doc_add_man_pages)
-
-
-###################################################################
 ##                    Development Helpers                        ##
 ###################################################################
 # For other projects to use this component (let us name it myproj),
@@ -1994,41 +958,6 @@ endmacro (install_dev_helper_files)
 #######################################
 ##          Overall Status           ##
 #######################################
-# Doxygen
-macro (display_doxygen)
-  message (STATUS)
-  message (STATUS "* Doxygen:")
-  message (STATUS "  - DOXYGEN_VERSION ............... : ${DOXYGEN_VERSION}")
-  message (STATUS "  - DOXYGEN_EXECUTABLE ............ : ${DOXYGEN_EXECUTABLE}")
-  message (STATUS "  - DOXYGEN_DOT_EXECUTABLE ........ : ${DOXYGEN_DOT_EXECUTABLE}")
-  message (STATUS "  - DOXYGEN_DOT_PATH .............. : ${DOXYGEN_DOT_PATH}")
-endmacro (display_doxygen)
-
-# Python
-macro (display_python)
-  if (PYTHONLIBS_FOUND)
-    message (STATUS)
-	message (STATUS "* Python:")
-	message (STATUS "  - PYTHONLIBS_VERSION ............ : ${PYTHONLIBS_VERSION}")
-	message (STATUS "  - PYTHON_LIBRARIES .............. : ${PYTHON_LIBRARIES}")
-	message (STATUS "  - PYTHON_INCLUDE_PATH ........... : ${PYTHON_INCLUDE_PATH}")
-	message (STATUS "  - PYTHON_INCLUDE_DIRS ........... : ${PYTHON_INCLUDE_DIRS}")
-	message (STATUS "  - PYTHON_DEBUG_LIBRARIES ........ : ${PYTHON_DEBUG_LIBRARIES}")
-	message (STATUS "  - Python_ADDITIONAL_VERSIONS .... : ${Python_ADDITIONAL_VERSIONS}")
-  endif (PYTHONLIBS_FOUND)
-endmacro (display_python)
-
-# ZeroMQ
-macro (display_zeromq)
-  if (ZEROMQ_FOUND)
-    message (STATUS)
-	message (STATUS "* ZeroMQ:")
-	message (STATUS "  - ZeroMQ_VERSION ................ : ${ZeroMQ_VERSION}")
-	message (STATUS "  - ZeroMQ_LIBRARIES .............. : ${ZeroMQ_LIBRARIES}")
-	message (STATUS "  - ZeroMQ_INCLUDE_DIR ............ : ${ZeroMQ_INCLUDE_DIR}")
-  endif (ZEROMQ_FOUND)
-endmacro (display_zeromq)
-
 # Boost
 macro (display_boost)
   if (Boost_FOUND)
@@ -2043,236 +972,19 @@ macro (display_boost)
   endif (Boost_FOUND)
 endmacro (display_boost)
 
-# Xapian
-macro (display_xapian)
-  if (XAPIAN_FOUND)
+# ComBase
+macro (display_combase)
+  if (Combase_FOUND)
     message (STATUS)
-    message (STATUS "* Xapian:")
-    message (STATUS "  - XAPIAN_VERSION ................ : ${XAPIAN_VERSION}")
-    message (STATUS "  - XAPIAN_LIBRARIES .............. : ${XAPIAN_LIBRARIES}")
-    message (STATUS "  - XAPIAN_INCLUDE_DIR ............ : ${XAPIAN_INCLUDE_DIR}")
-  endif (XAPIAN_FOUND)
-endmacro (display_xapian)
-
-# Readline
-macro (display_readline)
-  if (READLINE_FOUND)
-    message (STATUS)
-    message (STATUS "* Readline:")
-    message (STATUS "  - READLINE_VERSION .............. : ${READLINE_VERSION}")
-    message (STATUS "  - READLINE_INCLUDE_DIR .......... : ${READLINE_INCLUDE_DIR}")
-    message (STATUS "  - READLINE_LIBRARY .............. : ${READLINE_LIBRARY}")
-  endif (READLINE_FOUND)
-endmacro (display_readline)
-
-# MySQL
-macro (display_mysql)
-  if (MYSQL_FOUND)
-    message (STATUS)
-    message (STATUS "* MySQL:")
-    message (STATUS "  - MYSQL_VERSION ................. : ${MYSQL_VERSION}")
-    message (STATUS "  - MYSQL_INCLUDE_DIR ............. : ${MYSQL_INCLUDE_DIR}")
-    message (STATUS "  - MYSQL_LIBRARIES ............... : ${MYSQL_LIBRARIES}")
-  endif (MYSQL_FOUND)
-endmacro (display_mysql)
-
-# SOCI
-macro (display_soci)
-  if (SOCI_FOUND)
-    message (STATUS)
-    message (STATUS "* SOCI:")
-    message (STATUS "  - SOCI_VERSION .................. : ${SOCI_VERSION}")
-    message (STATUS "  - SOCI_LIB_VERSION .............. : ${SOCI_LIB_VERSION}")
-    message (STATUS "  - SOCI_HUMAN_VERSION ............ : ${SOCI_HUMAN_VERSION}")
-    message (STATUS "  - SOCI_INCLUDE_DIR .............. : ${SOCI_INCLUDE_DIR}")
-    message (STATUS "  - SOCIMYSQL_INCLUDE_DIR ......... : ${SOCIMYSQL_INCLUDE_DIR}")
-    message (STATUS "  - SOCI_LIBRARIES ................ : ${SOCI_LIBRARIES}")
-    message (STATUS "  - SOCIMYSQL_LIBRARIES ........... : ${SOCIMYSQL_LIBRARIES}")
-  endif (SOCI_FOUND)
-endmacro (display_soci)
-
-# StdAir
-macro (display_stdair)
-  if (StdAir_FOUND)
-    message (STATUS)
-    message (STATUS "* StdAir:")
-    message (STATUS "  - STDAIR_VERSION ................ : ${STDAIR_VERSION}")
-    message (STATUS "  - STDAIR_BINARY_DIRS ............ : ${STDAIR_BINARY_DIRS}")
-    message (STATUS "  - STDAIR_EXECUTABLES ............ : ${STDAIR_EXECUTABLES}")
-    message (STATUS "  - STDAIR_LIBRARY_DIRS ........... : ${STDAIR_LIBRARY_DIRS}")
-    message (STATUS "  - STDAIR_LIBRARIES .............. : ${STDAIR_LIBRARIES}")
-    message (STATUS "  - STDAIR_INCLUDE_DIRS ........... : ${STDAIR_INCLUDE_DIRS}")
-    message (STATUS "  - STDAIR_SAMPLE_DIR ............. : ${STDAIR_SAMPLE_DIR}")
-  endif (StdAir_FOUND)
-endmacro (display_stdair)
-
-# SEvMgr
-macro (display_sevmgr)
-  if (SEvMgr_FOUND)
-    message (STATUS)
-    message (STATUS "* SEvMgr:")
-    message (STATUS "  - SEVMGR_VERSION ................ : ${SEVMGR_VERSION}")
-    message (STATUS "  - SEVMGR_BINARY_DIRS ............ : ${SEVMGR_BINARY_DIRS}")
-    message (STATUS "  - SEVMGR_EXECUTABLES ............ : ${SEVMGR_EXECUTABLES}")
-    message (STATUS "  - SEVMGR_LIBRARY_DIRS ........... : ${SEVMGR_LIBRARY_DIRS}")
-    message (STATUS "  - SEVMGR_LIBRARIES .............. : ${SEVMGR_LIBRARIES}")
-    message (STATUS "  - SEVMGR_INCLUDE_DIRS ........... : ${SEVMGR_INCLUDE_DIRS}")
-  endif (SEvMgr_FOUND)
-endmacro (display_sevmgr)
-
-# TraDemGen
-macro (display_trademgen)
-  if (TraDemGen_FOUND)
-    message (STATUS)
-    message (STATUS "* TraDemGen:")
-    message (STATUS "  - TRADEMGEN_VERSION ............. : ${TRADEMGEN_VERSION}")
-    message (STATUS "  - TRADEMGEN_BINARY_DIRS ......... : ${TRADEMGEN_BINARY_DIRS}")
-    message (STATUS "  - TRADEMGEN_EXECUTABLES ......... : ${TRADEMGEN_EXECUTABLES}")
-    message (STATUS "  - TRADEMGEN_LIBRARY_DIRS ........ : ${TRADEMGEN_LIBRARY_DIRS}")
-    message (STATUS "  - TRADEMGEN_LIBRARIES ........... : ${TRADEMGEN_LIBRARIES}")
-    message (STATUS "  - TRADEMGEN_INCLUDE_DIRS ........ : ${TRADEMGEN_INCLUDE_DIRS}")
-  endif (TraDemGen_FOUND)
-endmacro (display_trademgen)
-
-# TravelCCM
-macro (display_travelccm)
-  if (TravelCCM_FOUND)
-    message (STATUS)
-    message (STATUS "* TravelCCM:")
-    message (STATUS "  - TRAVELCCM_VERSION ............. : ${TRAVELCCM_VERSION}")
-    message (STATUS "  - TRAVELCCM_BINARY_DIRS ......... : ${TRAVELCCM_BINARY_DIRS}")
-    message (STATUS "  - TRAVELCCM_EXECUTABLES ......... : ${TRAVELCCM_EXECUTABLES}")
-    message (STATUS "  - TRAVELCCM_LIBRARY_DIRS ........ : ${TRAVELCCM_LIBRARY_DIRS}")
-    message (STATUS "  - TRAVELCCM_LIBRARIES ........... : ${TRAVELCCM_LIBRARIES}")
-    message (STATUS "  - TRAVELCCM_INCLUDE_DIRS ........ : ${TRAVELCCM_INCLUDE_DIRS}")
-  endif (TravelCCM_FOUND)
-endmacro (display_travelccm)
-
-# AirSched
-macro (display_airsched)
-  if (AirSched_FOUND)
-    message (STATUS)
-    message (STATUS "* AirSched:")
-    message (STATUS "  - AIRSCHED_VERSION .............. : ${AIRSCHED_VERSION}")
-    message (STATUS "  - AIRSCHED_BINARY_DIRS .......... : ${AIRSCHED_BINARY_DIRS}")
-    message (STATUS "  - AIRSCHED_EXECUTABLES .......... : ${AIRSCHED_EXECUTABLES}")
-    message (STATUS "  - AIRSCHED_LIBRARY_DIRS ......... : ${AIRSCHED_LIBRARY_DIRS}")
-    message (STATUS "  - AIRSCHED_LIBRARIES ............ : ${AIRSCHED_LIBRARIES}")
-    message (STATUS "  - AIRSCHED_INCLUDE_DIRS ......... : ${AIRSCHED_INCLUDE_DIRS}")
-  endif (AirSched_FOUND)
-endmacro (display_airsched)
-
-# AirRAC
-macro (display_airrac)
-  if (AirRAC_FOUND)
-    message (STATUS)
-    message (STATUS "* AirRAC:")
-    message (STATUS "  - AIRRAC_VERSION ................ : ${AIRRAC_VERSION}")
-    message (STATUS "  - AIRRAC_BINARY_DIRS ............ : ${AIRRAC_BINARY_DIRS}")
-    message (STATUS "  - AIRRAC_EXECUTABLES ............ : ${AIRRAC_EXECUTABLES}")
-    message (STATUS "  - AIRRAC_LIBRARY_DIRS ........... : ${AIRRAC_LIBRARY_DIRS}")
-    message (STATUS "  - AIRRAC_LIBRARIES .............. : ${AIRRAC_LIBRARIES}")
-    message (STATUS "  - AIRRAC_INCLUDE_DIRS ........... : ${AIRRAC_INCLUDE_DIRS}")
-  endif (AirRAC_FOUND)
-endmacro (display_airrac)
-
-# RMOL
-macro (display_rmol)
-  if (RMOL_FOUND)
-    message (STATUS)
-    message (STATUS "* RMOL:")
-    message (STATUS "  - RMOL_VERSION .................. : ${RMOL_VERSION}")
-    message (STATUS "  - RMOL_BINARY_DIRS .............. : ${RMOL_BINARY_DIRS}")
-    message (STATUS "  - RMOL_EXECUTABLES .............. : ${RMOL_EXECUTABLES}")
-    message (STATUS "  - RMOL_LIBRARY_DIRS ............. : ${RMOL_LIBRARY_DIRS}")
-    message (STATUS "  - RMOL_LIBRARIES ................ : ${RMOL_LIBRARIES}")
-    message (STATUS "  - RMOL_INCLUDE_DIRS ............. : ${RMOL_INCLUDE_DIRS}")
-  endif (RMOL_FOUND)
-endmacro (display_rmol)
-
-# AirInv
-macro (display_airinv)
-  if (AirInv_FOUND)
-    message (STATUS)
-    message (STATUS "* AirInv:")
-    message (STATUS "  - AIRINV_VERSION ................ : ${AIRINV_VERSION}")
-    message (STATUS "  - AIRINV_BINARY_DIRS ............ : ${AIRINV_BINARY_DIRS}")
-    message (STATUS "  - AIRINV_EXECUTABLES ............ : ${AIRINV_EXECUTABLES}")
-    message (STATUS "  - AIRINV_LIBRARY_DIRS ........... : ${AIRINV_LIBRARY_DIRS}")
-    message (STATUS "  - AIRINV_LIBRARIES .............. : ${AIRINV_LIBRARIES}")
-    message (STATUS "  - AIRINV_INCLUDE_DIRS ........... : ${AIRINV_INCLUDE_DIRS}")
-  endif (AirInv_FOUND)
-endmacro (display_airinv)
-
-# AvlCal
-macro (display_avlcal)
-  if (AvlCal_FOUND)
-    message (STATUS)
-    message (STATUS "* AvlCal:")
-    message (STATUS "  - AVLCAL_VERSION ................ : ${AVLCAL_VERSION}")
-    message (STATUS "  - AVLCAL_BINARY_DIRS ............ : ${AVLCAL_BINARY_DIRS}")
-    message (STATUS "  - AVLCAL_EXECUTABLES ............ : ${AVLCAL_EXECUTABLES}")
-    message (STATUS "  - AVLCAL_LIBRARY_DIRS ........... : ${AVLCAL_LIBRARY_DIRS}")
-    message (STATUS "  - AVLCAL_LIBRARIES .............. : ${AVLCAL_LIBRARIES}")
-    message (STATUS "  - AVLCAL_INCLUDE_DIRS ........... : ${AVLCAL_INCLUDE_DIRS}")
-  endif (AvlCal_FOUND)
-endmacro (display_avlcal)
-
-# SimFQT
-macro (display_simfqt)
-  if (SimFQT_FOUND)
-    message (STATUS)
-    message (STATUS "* SimFQT:")
-    message (STATUS "  - SIMFQT_VERSION ................ : ${SIMFQT_VERSION}")
-    message (STATUS "  - SIMFQT_BINARY_DIRS ............ : ${SIMFQT_BINARY_DIRS}")
-    message (STATUS "  - SIMFQT_EXECUTABLES ............ : ${SIMFQT_EXECUTABLES}")
-    message (STATUS "  - SIMFQT_LIBRARY_DIRS ........... : ${SIMFQT_LIBRARY_DIRS}")
-    message (STATUS "  - SIMFQT_LIBRARIES .............. : ${SIMFQT_LIBRARIES}")
-    message (STATUS "  - SIMFQT_INCLUDE_DIRS ........... : ${SIMFQT_INCLUDE_DIRS}")
-  endif (SimFQT_FOUND)
-endmacro (display_simfqt)
-
-# SimLFS
-macro (display_simlfs)
-  if (SimLFS_FOUND)
-    message (STATUS)
-    message (STATUS "* SimLFS:")
-    message (STATUS "  - SIMLFS_VERSION ................ : ${SIMLFS_VERSION}")
-    message (STATUS "  - SIMLFS_BINARY_DIRS ............ : ${SIMLFS_BINARY_DIRS}")
-    message (STATUS "  - SIMLFS_EXECUTABLES ............ : ${SIMLFS_EXECUTABLES}")
-    message (STATUS "  - SIMLFS_LIBRARY_DIRS ........... : ${SIMLFS_LIBRARY_DIRS}")
-    message (STATUS "  - SIMLFS_LIBRARIES .............. : ${SIMLFS_LIBRARIES}")
-    message (STATUS "  - SIMLFS_INCLUDE_DIRS ........... : ${SIMLFS_INCLUDE_DIRS}")
-  endif (SimLFS_FOUND)
-endmacro (display_simlfs)
-
-# SimCRS
-macro (display_simcrs)
-  if (SimCRS_FOUND)
-    message (STATUS)
-    message (STATUS "* SimCRS:")
-    message (STATUS "  - SIMCRS_VERSION ................ : ${SIMCRS_VERSION}")
-    message (STATUS "  - SIMCRS_BINARY_DIRS ............ : ${SIMCRS_BINARY_DIRS}")
-    message (STATUS "  - SIMCRS_EXECUTABLES ............ : ${SIMCRS_EXECUTABLES}")
-    message (STATUS "  - SIMCRS_LIBRARY_DIRS ........... : ${SIMCRS_LIBRARY_DIRS}")
-    message (STATUS "  - SIMCRS_LIBRARIES .............. : ${SIMCRS_LIBRARIES}")
-    message (STATUS "  - SIMCRS_INCLUDE_DIRS ........... : ${SIMCRS_INCLUDE_DIRS}")
-  endif (SimCRS_FOUND)
-endmacro (display_simcrs)
-
-# DSim
-macro (display_dsim)
-  if (DSim_FOUND)
-    message (STATUS)
-    message (STATUS "* DSim:")
-    message (STATUS "  - DSIM_VERSION .................. : ${DSIM_VERSION}")
-    message (STATUS "  - DSIM_BINARY_DIRS .............. : ${DSIM_BINARY_DIRS}")
-    message (STATUS "  - DSIM_EXECUTABLES .............. : ${DSIM_EXECUTABLES}")
-    message (STATUS "  - DSIM_LIBRARY_DIRS ............. : ${DSIM_LIBRARY_DIRS}")
-    message (STATUS "  - DSIM_LIBRARIES ................ : ${DSIM_LIBRARIES}")
-    message (STATUS "  - DSIM_INCLUDE_DIRS ............. : ${DSIM_INCLUDE_DIRS}")
-  endif (DSim_FOUND)
-endmacro (display_dsim)
+    message (STATUS "* ComBase:")
+    message (STATUS "  - COMBASE_VERSION ................ : ${COMBASE_VERSION}")
+    message (STATUS "  - COMBASE_BINARY_DIRS ............ : ${COMBASE_BINARY_DIRS}")
+    message (STATUS "  - COMBASE_EXECUTABLES ............ : ${COMBASE_EXECUTABLES}")
+    message (STATUS "  - COMBASE_LIBRARY_DIRS ........... : ${COMBASE_LIBRARY_DIRS}")
+    message (STATUS "  - COMBASE_LIBRARIES .............. : ${COMBASE_LIBRARIES}")
+    message (STATUS "  - COMBASE_INCLUDE_DIRS ........... : ${COMBASE_INCLUDE_DIRS}")
+  endif (Combase_FOUND)
+endmacro (display_combase)
 
 ##
 macro (display_status_all_modules)
@@ -2297,19 +1009,6 @@ macro (display_status_all_test_suites)
     message (STATUS "  + Tests to perform .............. : ${${_test_suite}_ALL_TESTS}")
   endforeach (_test_suite)
 endmacro (display_status_all_test_suites)
-
-##
-macro (display_doc_generation)
-  message (STATUS)
-    message (STATUS "* Documentation to be generated ... :")
-	if (INSTALL_DOC)
-      message (STATUS "  + HTML main page ................ : ${DOXYGEN_OUTPUT_REL}")
-      message (STATUS "  + CSS-related files ............. : ${CSS_ALL_TARGETS}")
-      message (STATUS "  + Image-related files ........... : ${IMG_ALL_TARGETS}")
-      message (STATUS "  + PDF reference manual .......... : ${REFMAN_TEX} => ${REFMAN_PDF}")
-	endif (INSTALL_DOC)
-    message (STATUS "  + Man page sections ............. : ${MAN_ALL_TARGETS}")
-endmacro (display_doc_generation)
 
 ##
 macro (display_status)
@@ -2337,7 +1036,6 @@ macro (display_status)
   message (STATUS "Binaries to test .................. : ${PROJ_ALL_TST_TARGETS}")
   display_status_all_modules ()
   display_status_all_test_suites ()
-  display_doc_generation ()
   message (STATUS)
   message (STATUS "BUILD_SHARED_LIBS ................. : ${BUILD_SHARED_LIBS}")
   message (STATUS "CMAKE_BUILD_TYPE .................. : ${CMAKE_BUILD_TYPE}")
@@ -2348,7 +1046,6 @@ macro (display_status)
   message (STATUS "ENABLE_TEST ....................... : ${ENABLE_TEST}" )
   message (STATUS "CMAKE_MODULE_PATH ................. : ${CMAKE_MODULE_PATH}")
   message (STATUS "CMAKE_INSTALL_PREFIX .............. : ${CMAKE_INSTALL_PREFIX}")
-  display_doxygen ()
   message (STATUS)
   message (STATUS "-------------------------------------")
   message (STATUS "---  Installation Configuration   ---")
@@ -2358,9 +1055,6 @@ macro (display_status)
   message (STATUS "CMAKE_INSTALL_RPATH ............... : ${CMAKE_INSTALL_RPATH}")
   message (STATUS "CMAKE_INSTALL_RPATH_USE_LINK_PATH . : ${CMAKE_INSTALL_RPATH_USE_LINK_PATH}")
   message (STATUS "INSTALL_INCLUDE_DIR ............... : ${INSTALL_INCLUDE_DIR}")
-  message (STATUS "INSTALL_DATA_DIR .................. : ${INSTALL_DATA_DIR}")
-  message (STATUS "INSTALL_SAMPLE_DIR ................ : ${INSTALL_SAMPLE_DIR}")
-  message (STATUS "INSTALL_DOC ....................... : ${INSTALL_DOC}" )
   message (STATUS)
   message (STATUS "-------------------------------------")
   message (STATUS "---    Packaging Configuration    ---")
@@ -2380,26 +1074,8 @@ macro (display_status)
   message (STATUS "---      External libraries      ---")
   message (STATUS "------------------------------------")
   #
-  display_python ()
-  display_zeromq ()
   display_boost ()
-  display_xapian ()
-  display_readline ()
-  display_mysql ()
-  display_soci ()
-  display_stdair ()
-  display_sevmgr ()
-  display_trademgen ()
-  display_travelccm ()
-  display_airsched ()
-  display_airrac ()
-  display_rmol ()
-  display_airinv ()
-  display_avlcal ()
-  display_simfqt ()
-  display_simlfs ()
-  display_simcrs ()
-  display_dsim ()
+  display_combase ()
   #
   message (STATUS)
   message (STATUS "Change a value with: cmake -D<Variable>=<Value>" )

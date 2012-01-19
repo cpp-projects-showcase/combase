@@ -9,38 +9,18 @@
 #include <sstream>
 #include <fstream>
 #include <string>
-// Boost MPL
-#include <boost/mpl/push_back.hpp>
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/at.hpp>
-#include <boost/mpl/assert.hpp>
-#include <boost/type_traits/is_same.hpp>
 // Boost Unit Test Framework (UTF)
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE CombaseTest
 #include <boost/test/unit_test.hpp>
-// Boost Serialisation
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 // Combase
-#include <combase/combase_inventory_types.hpp>
-#include <combase/service/Logger.hpp>
-#include <combase/COMBASE_Service.hpp>
-#include <combase/basic/float_utils.hpp>
-#include <combase/bom/BomDisplay.hpp>
-#include <combase/bom/BomRoot.hpp>
-#include <combase/bom/BomManager.hpp>
-#include <combase/factory/FacBom.hpp>
-#include <combase/factory/FacBomManager.hpp>
-// Combase Test Suite
-#include <test/combase/CombaseTestLib.hpp>
-#include <test/combase/MPInventory.hpp>
+#include <combase/combase.hpp>
 
 namespace boost_utf = boost::unit_test;
 
 // (Boost) Unit Test XML Report
-std::ofstream utfReportStream ("StandardAirlineITTestSuite_utfresults.xml");
+std::ofstream utfReportStream ("ComBase_utfresults.xml");
 
 /**
  * Configuration for the Boost Unit Test Framework (UTF)

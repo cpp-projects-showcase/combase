@@ -4,4 +4,16 @@ That project is part of the showcase platform for C++ projects.
 The common base (in short, 'combase') project contains a purely virtual
 C++ class, which serves as a base class for other C++ projects/components.
 
+- The 'trunk' branch contains a simple version of that fundamental component.
+  Use that version if you just want to see (the CMake code demonstrating)
+  how a component can be exported and imported by other components.
+- The 'trunkff' branch (where 'ff' stands for 'full featured') contains a full
+  blown component, providing the other components with facilities such as
+  logging, database access, documentation (HTML pages, PDF reference manual,
+  manual pages) generation, bindings for UI (User Interface), script languages
+  (Python) and client/server frameworks.
+  Use that version if you want a universal reference for building, testing,
+  integrating and delivering your own multi-component projects.
 
+
+(Denis Arnaud, January 2012)

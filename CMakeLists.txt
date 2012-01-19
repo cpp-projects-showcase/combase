@@ -39,8 +39,7 @@ packaging_set_other_options (TBZ2 "TBZ2;TGZ")
 ##            Dependencies            ##
 ########################################
 #
-get_external_libs (git "python 2.4" "boost 1.33" "mysql 5.4" "soci 3.0"
-  "doxygen 1.4")
+get_external_libs (git "boost 1.41")
 
 
 ##############################################
@@ -55,25 +54,9 @@ init_build ()
 add_modules (${PROJECT_NAME})
 
 ##
-# For other projects to use COMBASE, install a few helpers for standard
+# For other projects to use ComBase, install a few helpers for standard
 # build/packaging systems: CMake, GNU Autotools (M4), pkgconfig/pc, combase-config
 install_dev_helper_files ()
-
-##
-# Basic documentation (i.e., AUTHORS, NEWS, README, INSTALL)
-install_basic_documentation ()
-
-
-##########################################
-##            Documentation             ##
-##########################################
-handle_html_doc ()
-
-##
-# Subdirs
-add_subdirectory (db)
-add_subdirectory (samples)
-add_subdirectory (man)
 
 
 #####################################
