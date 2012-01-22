@@ -6,18 +6,16 @@
 #  COMBASE_LIBRARY_DIRS - library directories for ComBase (normally not used!)
 #  COMBASE_LIBRARIES    - libraries to link against
 #  COMBASE_EXECUTABLES  - the combase binaries/executables
-#  COMBASE_SAMPLE_DIR   - the combase (CSV) sample files
 
-# Tell the user project where to find the headers, libraries and sample files
+# Tell the user project where to find the headers and libraries
 set (COMBASE_VERSION "@PACKAGE_VERSION@")
 set (COMBASE_BINARY_DIRS "@COMBASE_BIN_DIR@")
 set (COMBASE_INCLUDE_DIRS "@COMBASE_INCLUDE_DIRS@")
 set (COMBASE_LIBRARY_DIRS "@COMBASE_LIB_DIR@")
-set (COMBASE_SAMPLE_DIR "@COMBASE_SAMPLE_DIR@")
 
 # Our library dependencies (contains definitions for IMPORTED targets)
 include ("@COMBASE_CMAKE_DIR@/combase-library-depends.cmake")
 
 # These are IMPORTED targets created by combase-library-depends.cmake
-set (COMBASE_LIBRARIES combaselib combaseuicllib)
-set (COMBASE_EXECUTABLES combase)
+set (COMBASE_LIBRARIES combaselib)
+set (COMBASE_EXECUTABLES)

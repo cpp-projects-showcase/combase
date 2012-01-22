@@ -21,12 +21,7 @@ namespace combase {
    */
   class BomAbstract {
   public:
-
-    /**
-     * Destructor.
-     */
-    virtual ~BomAbstract() {}
-
+    // /////////////// Display Support Methods //////////////
     /**
      * Dump a Business Object into an output stream.
      *
@@ -48,11 +43,18 @@ namespace combase {
      */
     virtual const std::string describe() const = 0;
 
-  protected:
+
+  public:
+    // ////////////////// Initialisation and Destruction ///////////////////
     /**
-     * Protected Default Constructor to ensure this class is abtract.
+     * Default Constructor.
      */
     BomAbstract() {}
+
+    /**
+     * Destructor.
+     */
+    virtual ~BomAbstract() {}
   };
 }
 

@@ -1,19 +1,60 @@
 
+Summary:
+--------
 That project is part of the showcase platform for C++ projects.
 
 The common base (in short, 'combase') project contains a purely virtual
 C++ class, which serves as a base class for other C++ projects/components.
 
-- The 'trunk' branch contains a simple version of that fundamental component.
+* The 'trunk' branch contains a simple version of that fundamental component.
   Use that version if you just want to see (the CMake code demonstrating)
   how a component can be exported and imported by other components.
-- The 'trunkff' branch (where 'ff' stands for 'full featured') contains a full
+* The 'trunkff' branch (where 'ff' stands for 'full featured') contains a full
   blown component, providing the other components with facilities such as
   logging, database access, documentation (HTML pages, PDF reference manual,
   manual pages) generation, bindings for UI (User Interface), script languages
   (Python) and client/server frameworks.
   Use that version if you want a universal reference for building, testing,
   integrating and delivering your own multi-component projects.
+
+
+Building the library and test binary from Git repository:
+---------------------------------------------------------
+The Sourceforge Git repository may be cloned as following:
+git clone ssh://github.com/cpp-projects-showcase/combase combasegit
+cd combasegit
+git checkout trunk
+
+Then, you need the following packages (Fedora/RedHat/CentOS names here, 
+but names may vary according to distributions):
+* cmake
+* gcc-c++
+* boost-devel
+* rpm-build (optional)
+
+
+Building the library and test binary from the tarball:
+------------------------------------------------------
+The latest stable source tarball (combase*.tar.gz or .bz2) can be found here:
+https://github.com/cpp-projects-showcase/combase/downloads
+
+Then, as usual:
+* To configure the project, type something like:
+  mkdir build && cd build
+  cmake -DCMAKE_INSTALL_PREFIX=/home/user/dev/deliveries/combase-99.99.99 \
+   -DCMAKE_BUILD_TYPE:STRING=Debug -DENABLE_TEST:BOOL=ON ..
+* To build the project, type:
+  make
+* To test the project, type:
+  make check
+* To install the library (libcombase*.so*), just type:
+  make install
+* To package the source files, type:
+  make dist
+* To package the binary:
+  make package
+* To check the installation:
+  /home/user/dev/deliveries/combase-99.99.99/bin/combase-config --help
 
 
 (Denis Arnaud, January 2012)

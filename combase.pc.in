@@ -9,7 +9,6 @@ includedir=${prefix}/include
 datarootdir=${prefix}/share
 datadir=${datarootdir}
 pkgdatadir=${datarootdir}/@PACKAGE@
-sampledir=${datarootdir}/@PACKAGE@/samples
 docdir=${datarootdir}/doc/@PACKAGE@-@PACKAGE_VERSION@
 mandir=${datarootdir}/man
 infodir=${datarootdir}/info
@@ -20,8 +19,8 @@ pkglibdir=${libdir}/@PACKAGE@
 pkglibexecdir=${libexecdir}/@PACKAGE@
 
 Name: @PACKAGE_PRETTY_NAME@
-Description: C++ Standard Airline IT Object Library
+Description: C++ Common Base
 Version: @PACKAGE_VERSION@
-URL: http://sourceforge.net/projects/@PACKAGE@/
+URL: http://github.com/cpp-projects-showcase/@PACKAGE@/
 Libs: -L${libdir} -l@PACKAGE@ @LDFLAGS@ @LIBS@
 Cflags: -I${includedir}

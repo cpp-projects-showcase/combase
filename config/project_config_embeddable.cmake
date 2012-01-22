@@ -65,12 +65,10 @@ endmacro (set_project_versions)
 #                         - Whether or not to set the run-path/rpath within
 #                           the (executable and library) binaries
 #  * ENABLE_TEST         - Whether or not to build and check the unit tests
-#  * INSTALL_DOC         - Whether or not to build and install the documentation
 #  * INSTALL_LIB_DIR     - Installation directory for the libraries
 #  * INSTALL_BIN_DIR     - Installation directory for the binaries
-#  * INSTALL_INCLUDE_DIR - Installation directory for the header files
 #  * INSTALL_DATA_DIR    - Installation directory for the data files
-#  * INSTALL_SAMPLE_DIR  - Installation directory for the (CSV) sample files
+#  * INSTALL_INCLUDE_DIR - Installation directory for the header files
 #
 macro (set_project_options _build_doc _enable_tests)
   # Shared libraries
@@ -101,9 +99,11 @@ macro (set_project_options _build_doc _enable_tests)
   set (INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
   set (INSTALL_INCLUDE_DIR include CACHE PATH
     "Installation directory for header files")
+  set (INSTALL_DATA_DIR share CACHE PATH
+    "Installation directory for data files")
 
   # Make relative paths absolute (needed later on)
-  foreach (_path_type LIB BIN INCLUDE)
+  foreach (_path_type LIB BIN INCLUDE DATA)
     set (var INSTALL_${_path_type}_DIR)
     if (NOT IS_ABSOLUTE "${${var}}")
       set (${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
@@ -273,6 +273,10 @@ macro (get_external_libs)
       get_combase (${_arg_version})
     endif (${_arg_lower} STREQUAL "combase")
 
+    if (${_arg_lower} STREQUAL "randgen")
+      get_randgen (${_arg_version})
+    endif (${_arg_lower} STREQUAL "randgen")
+
   endforeach (_arg)
 endmacro (get_external_libs)
 
@@ -352,7 +356,7 @@ macro (get_combase)
 
   find_package (ComBase ${_required_version} REQUIRED
 	HINTS ${WITH_COMBASE_PREFIX})
-  if (Combase_FOUND)
+  if (ComBase_FOUND)
     #
     message (STATUS "Found ComBase version: ${COMBASE_VERSION}")
 
@@ -362,14 +366,45 @@ macro (get_combase)
     # Update the list of dependencies for the project
     set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${COMBASE_LIBRARIES})
 
-  else (Combase_FOUND)
+  else (ComBase_FOUND)
     set (ERROR_MSG "The ComBase library cannot be found. If it is installed in")
-    set (ERROR_MSG "${ERROR_MSG} a in a non standard directory, just invoke")
+    set (ERROR_MSG "${ERROR_MSG} a non standard directory, just invoke")
     set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_COMBASE_PREFIX=")
     set (ERROR_MSG "${ERROR_MSG}<ComBase install path> variable.")
     message (FATAL_ERROR "${ERROR_MSG}")
-  endif (Combase_FOUND)
+  endif (ComBase_FOUND)
 endmacro (get_combase)
+
+# ~~~~~~~~~~ RandGen ~~~~~~~~~
+macro (get_randgen)
+  unset (_required_version)
+  if (${ARGC} GREATER 0)
+    set (_required_version ${ARGV0})
+    message (STATUS "Requires RandGen-${_required_version}")
+  else (${ARGC} GREATER 0)
+    message (STATUS "Requires RandGen without specifying any version")
+  endif (${ARGC} GREATER 0)
+
+  find_package (RandGen ${_required_version} REQUIRED
+	HINTS ${WITH_RANDGEN_PREFIX})
+  if (RandGen_FOUND)
+    #
+    message (STATUS "Found RandGen version: ${RANDGEN_VERSION}")
+
+    # Update the list of include directories for the project
+    include_directories (${RANDGEN_INCLUDE_DIRS})
+
+    # Update the list of dependencies for the project
+    set (PROJ_DEP_LIBS_FOR_LIB ${PROJ_DEP_LIBS_FOR_LIB} ${RANDGEN_LIBRARIES})
+
+  else (RandGen_FOUND)
+    set (ERROR_MSG "The RandGen library cannot be found. If it is installed in")
+    set (ERROR_MSG "${ERROR_MSG} a non standard directory, just invoke")
+    set (ERROR_MSG "${ERROR_MSG} 'cmake' specifying the -DWITH_RANDGEN_PREFIX=")
+    set (ERROR_MSG "${ERROR_MSG}<RandGen install path> variable.")
+    message (FATAL_ERROR "${ERROR_MSG}")
+  endif (RandGen_FOUND)
+endmacro (get_randgen)
 
 
 ##############################################
@@ -438,9 +473,9 @@ macro (set_install_directories)
   set (pdfdir        ${htmldir})
   set (mandir        ${datarootdir}/man)
   set (infodir       ${datarootdir}/info)
-  set (pkgincludedir ${includedir}/combase)
-  set (pkglibdir     ${libdir}/combase)
-  set (pkglibexecdir ${libexecdir}/combase)
+  set (pkgincludedir ${includedir}/${PACKAGE})
+  set (pkglibdir     ${libdir}/${PACKAGE})
+  set (pkglibexecdir ${libexecdir}/${PACKAGE})
 endmacro (set_install_directories)
 
 
@@ -923,7 +958,7 @@ macro (install_dev_helper_files)
   set (${PACKAGE_NAME}_INCLUDE_DIRS "${INSTALL_INCLUDE_DIR}")
   set (${PACKAGE_NAME}_BIN_DIR "${INSTALL_BIN_DIR}")
   set (${PACKAGE_NAME}_LIB_DIR "${INSTALL_LIB_DIR}")
-  set (${PACKAGE_NAME}_SAMPLE_DIR "${INSTALL_SAMPLE_DIR}")
+  set (${PACKAGE_NAME}_DATA_DIR "${INSTALL_DATA_DIR}")
   set (${PACKAGE_NAME}_CMAKE_DIR "${LIB_DEPENDENCY_EXPORT_PATH}")
   configure_file (${PROJECT_NAME}-config.cmake.in
 	"${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake" @ONLY)
@@ -974,7 +1009,7 @@ endmacro (display_boost)
 
 # ComBase
 macro (display_combase)
-  if (Combase_FOUND)
+  if (ComBase_FOUND)
     message (STATUS)
     message (STATUS "* ComBase:")
     message (STATUS "  - COMBASE_VERSION ................ : ${COMBASE_VERSION}")
@@ -983,8 +1018,22 @@ macro (display_combase)
     message (STATUS "  - COMBASE_LIBRARY_DIRS ........... : ${COMBASE_LIBRARY_DIRS}")
     message (STATUS "  - COMBASE_LIBRARIES .............. : ${COMBASE_LIBRARIES}")
     message (STATUS "  - COMBASE_INCLUDE_DIRS ........... : ${COMBASE_INCLUDE_DIRS}")
-  endif (Combase_FOUND)
+  endif (ComBase_FOUND)
 endmacro (display_combase)
+
+# RandGen
+macro (display_randgen)
+  if (RandGen_FOUND)
+    message (STATUS)
+    message (STATUS "* RandGen:")
+    message (STATUS "  - RANDGEN_VERSION ................ : ${RANDGEN_VERSION}")
+    message (STATUS "  - RANDGEN_BINARY_DIRS ............ : ${RANDGEN_BINARY_DIRS}")
+    message (STATUS "  - RANDGEN_EXECUTABLES ............ : ${RANDGEN_EXECUTABLES}")
+    message (STATUS "  - RANDGEN_LIBRARY_DIRS ........... : ${RANDGEN_LIBRARY_DIRS}")
+    message (STATUS "  - RANDGEN_LIBRARIES .............. : ${RANDGEN_LIBRARIES}")
+    message (STATUS "  - RANDGEN_INCLUDE_DIRS ........... : ${RANDGEN_INCLUDE_DIRS}")
+  endif (RandGen_FOUND)
+endmacro (display_randgen)
 
 ##
 macro (display_status_all_modules)
@@ -1055,6 +1104,7 @@ macro (display_status)
   message (STATUS "CMAKE_INSTALL_RPATH ............... : ${CMAKE_INSTALL_RPATH}")
   message (STATUS "CMAKE_INSTALL_RPATH_USE_LINK_PATH . : ${CMAKE_INSTALL_RPATH_USE_LINK_PATH}")
   message (STATUS "INSTALL_INCLUDE_DIR ............... : ${INSTALL_INCLUDE_DIR}")
+  message (STATUS "INSTALL_DATA_DIR .................. : ${INSTALL_DATA_DIR}")
   message (STATUS)
   message (STATUS "-------------------------------------")
   message (STATUS "---    Packaging Configuration    ---")
@@ -1076,6 +1126,7 @@ macro (display_status)
   #
   display_boost ()
   display_combase ()
+  display_randgen ()
   #
   message (STATUS)
   message (STATUS "Change a value with: cmake -D<Variable>=<Value>" )
