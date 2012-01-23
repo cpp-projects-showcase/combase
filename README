@@ -38,23 +38,32 @@ Building the library and test binary from the tarball:
 The latest stable source tarball (combase*.tar.gz or .bz2) can be found here:
 https://github.com/cpp-projects-showcase/combase/downloads
 
+To customise the following to your environment, you can alter the path
+to the installation directory:
+export INSTALL_BASEDIR=/home/user/dev/deliveries
+export LIBSUFFIX_4_CMAKE="-DLIB_SUFFIX=64"
+
 Then, as usual:
 * To configure the project, type something like:
   mkdir build && cd build
-  cmake -DCMAKE_INSTALL_PREFIX=/home/user/dev/deliveries/combase-99.99.99 \
-   -DCMAKE_BUILD_TYPE:STRING=Debug -DENABLE_TEST:BOOL=ON ..
+  cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_BASEDIR}/combase-0.1.0 \
+   -DCMAKE_BUILD_TYPE:STRING=Debug \
+   -DENABLE_TEST:BOOL=ON -DINSTALL_DOC:BOOL=ON ${LIBSUFFIX_4_CMAKE} ..
 * To build the project, type:
   make
 * To test the project, type:
   make check
 * To install the library (libcombase*.so*), just type:
   make install
+  cd ${INSTALL_BASEDIR}
+  rm -f combase-stable && ln -s combase-0.1.0 combase-stable
+  cd -
 * To package the source files, type:
   make dist
 * To package the binary:
   make package
 * To check the installation:
-  /home/user/dev/deliveries/combase-99.99.99/bin/combase-config --help
+  ${INSTALL_BASEDIR}/bin/combase-config --help
 
 
 (Denis Arnaud, January 2012)
